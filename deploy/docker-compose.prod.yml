@@ -1,0 +1,117 @@
+# Public instance: one VM (e.g. Oracle Cloud Always Free Ampere A1, 2 OCPU / 12 GB / 200 GB disk).
+#   cp .env.example .env   # then edit it
+#   docker compose -f docker-compose.prod.yml up -d
+# Images come from GitHub Container Registry (.github/workflows/publish.yml); nothing is built on the server.
+name: geo-tracker
+
+services:
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      # Folder mount (not the single file) so `caddy reload` sees edits.
+      - ./caddy:/etc/caddy:ro
+      # TLS certificates and keys: never delete this volume casually.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - frontend
+
+  frontend:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER in .env}/geo-tracker-frontend:${TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    image: ghcr.io/${GHCR_OWNER}/geo-tracker-backend:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-geotracker}
+      DB_USER: ${DB_USER:-geotracker}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?set ADMIN_TOKEN in .env}
+      INMET_SYNC_ENABLED: ${INMET_SYNC_ENABLED:-true}
+      # No container memory limit: the JVM sizes its heap from the VM's RAM.
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=35
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health/readiness"]
+      interval: 15s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    # Sized for 12 GB of RAM shared with the JVM; durable commits (unlike the local bulk-load stack).
+    command:
+      - postgres
+      - -c
+      - shared_buffers=2GB
+      - -c
+      - effective_cache_size=6GB
+      - -c
+      - work_mem=32MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - max_wal_size=4GB
+    environment:
+      POSTGRES_DB: ${DB_NAME:-geotracker}
+      POSTGRES_USER: ${DB_USER:-geotracker}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql
+    shm_size: 512mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Daily compressed dump; restore with: pg_restore --clean -U <user> -d <db> <file>.dump
+  backup:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-geotracker}
+      PGUSER: ${DB_USER:-geotracker}
+      PGPASSWORD: ${DB_PASSWORD}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-3}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          file=/backups/geo-tracker-$$(date -u +%Y%m%dT%H%M%SZ).dump
+          if pg_dump --format=custom --file="$$file.partial"; then
+            mv "$$file.partial" "$$file"
+            find /backups -name 'geo-tracker-*.dump' -mtime +$$KEEP_DAYS -delete
+          else
+            rm -f "$$file.partial"
+          fi
+          sleep 86400
+        done
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

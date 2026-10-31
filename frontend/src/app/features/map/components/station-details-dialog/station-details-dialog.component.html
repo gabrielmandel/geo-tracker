@@ -1,0 +1,155 @@
+<section class="station-dialog">
+  <header class="station-dialog__header">
+    <div class="station-dialog__title">
+      <span class="station-dialog__eyebrow">WEATHER STATION · {{ station().code }}</span>
+      <h2>{{ station().name }}</h2>
+      <p>{{ station().region }} · {{ station().state }} · ID {{ station().id }}</p>
+    </div>
+    <button mat-icon-button type="button" aria-label="Close station details" (click)="close()">
+      <ng-icon name="lucideX" />
+    </button>
+  </header>
+
+  <dl class="station-dialog__facts">
+    <div><dt>Founded</dt><dd>{{ station().foundedOn ? (station().foundedOn | date: 'dd/MM/yyyy') : 'Unknown' }}</dd></div>
+    <div><dt>Altitude</dt><dd>{{ station().altitude === null ? '—' : (station().altitude | number: '1.0-1') + ' m' }}</dd></div>
+    <div><dt>Coordinates</dt><dd>{{ station().latitude | number: '1.4-4' }}, {{ station().longitude | number: '1.4-4' }}</dd></div>
+    <div><dt>Data through</dt><dd>{{ station().detailsAsOf | date: 'dd/MM/yyyy' }}</dd></div>
+  </dl>
+
+  <mat-tab-group class="station-dialog__tabs" animationDuration="0ms" (selectedTabChange)="onTabChange($event.index)">
+    <mat-tab label="Hourly data">
+      <div class="station-tab">
+        <div class="station-range-controls">
+          <div class="station-period">
+            <span>Period</span>
+            <app-date-range-field
+              [range]="hourlyRange()"
+              [max]="today"
+              ariaLabel="Hourly data date range"
+              (rangeChange)="setHourlyRange($event)" />
+          </div>
+          <span class="station-row-count">{{ hourlyRows().length }} hours</span>
+        </div>
+        @if (hourlyError()) { <p class="station-message station-message--error">{{ hourlyError() }}</p> }
+        @else if (hourlyLoading()) { <p class="station-message">Loading hourly observations…</p> }
+        @else if (hourlyRows().length === 0) { <p class="station-message">No observations in this range.</p> }
+        @else {
+          <div class="station-table-wrap">
+            <table mat-table class="geo-table" [dataSource]="hourlyRows()">
+              <ng-container matColumnDef="observedAt">
+                <th mat-header-cell *matHeaderCellDef>Hour (local)</th>
+                <td mat-cell *matCellDef="let row">{{ row.observedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+              @for (column of hourlyColumns; track column.key) {
+                <ng-container [matColumnDef]="column.key">
+                  <th mat-header-cell *matHeaderCellDef>{{ column.label }}</th>
+                  <td mat-cell *matCellDef="let row">{{ row[column.key] ?? '—' }}</td>
+                </ng-container>
+              }
+              <tr mat-header-row *matHeaderRowDef="hourlyColumnIds; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: hourlyColumnIds"></tr>
+            </table>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Annual data">
+      <div class="station-tab">
+        @if (annualError()) { <p class="station-message station-message--error">{{ annualError() }}</p> }
+        @else if (annualLoading()) { <p class="station-message">Loading annual summaries…</p> }
+        @else if (annualRows()?.length === 0) { <p class="station-message">No annual observations found.</p> }
+        @else if (annualRows(); as years) {
+          <div class="station-table-wrap">
+            <table mat-table class="geo-table" [dataSource]="years">
+              <ng-container matColumnDef="year">
+                <th mat-header-cell *matHeaderCellDef>Year</th>
+                <td mat-cell *matCellDef="let year">{{ year.year }}</td>
+              </ng-container>
+              <ng-container matColumnDef="precipitationMm">
+                <th mat-header-cell *matHeaderCellDef>Precipitation mm</th>
+                <td mat-cell *matCellDef="let year">{{ year.precipitationMm | number: '1.1-1' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="observationHours">
+                <th mat-header-cell *matHeaderCellDef>Observation hours</th>
+                <td mat-cell *matCellDef="let year">{{ year.observationHours | number }}</td>
+              </ng-container>
+              <ng-container matColumnDef="missingPrecipitationHours">
+                <th mat-header-cell *matHeaderCellDef>Missing precipitation</th>
+                <td mat-cell *matCellDef="let year">{{ year.missingPrecipitationHours | number }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="annualColumnIds; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: annualColumnIds"></tr>
+            </table>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Rainfall events">
+      <div class="station-tab">
+        <div class="station-range-controls">
+          <div class="station-period station-period--year">
+            <span>Year</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+              <mat-select
+                [value]="selectedYear()"
+                panelClass="geo-select-panel"
+                aria-label="Rainfall events year"
+                (selectionChange)="onYearChange($event.value)">
+                @for (year of annualRows() ?? []; track year.year) {
+                  <mat-option [value]="year.year">{{ year.year }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <span class="station-row-count">{{ events().length }} events</span>
+        </div>
+        @if (eventsError()) { <p class="station-message station-message--error">{{ eventsError() }}</p> }
+        @else if (annualLoading() || eventsLoading()) { <p class="station-message">Loading rainfall events…</p> }
+        @else if (events().length === 0) { <p class="station-message">No rainfall events found for this year.</p> }
+        @else {
+          <div class="station-table-wrap">
+            <table mat-table class="geo-table" [dataSource]="events()">
+              <ng-container matColumnDef="startedAt">
+                <th mat-header-cell *matHeaderCellDef>Start (local)</th>
+                <td mat-cell *matCellDef="let event">{{ event.startedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="endedAt">
+                <th mat-header-cell *matHeaderCellDef>End (local)</th>
+                <td mat-cell *matCellDef="let event">{{ event.endedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="precipitationMm">
+                <th mat-header-cell *matHeaderCellDef>Total mm</th>
+                <td mat-cell *matCellDef="let event">{{ event.precipitationMm | number: '1.1-1' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="maxHourlyMm">
+                <th mat-header-cell *matHeaderCellDef>Peak hour mm</th>
+                <td mat-cell *matCellDef="let event">{{ event.maxHourlyMm | number: '1.1-1' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="ei30">
+                <th mat-header-cell *matHeaderCellDef>EI30</th>
+                <td mat-cell *matCellDef="let event">{{ event.ei30 | number: '1.1-1' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="erosive">
+                <th mat-header-cell *matHeaderCellDef>Class</th>
+                <td mat-cell *matCellDef="let event">{{ event.erosive ? 'Erosive' : 'Non-erosive' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="eventColumnIds; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: eventColumnIds"></tr>
+            </table>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="R factor">
+      <ng-template matTabContent>
+        <div class="station-tab station-tab--scroll">
+          <app-station-r-factor [station]="station()" />
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</section>

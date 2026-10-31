@@ -1,0 +1,44 @@
+// Shared field tokens live on .geo-field (src/geo-material.scss); these are the date-range specifics.
+.range-field {
+  --mat-datepicker-range-input-separator-color: var(--home-muted, #94aaa0);
+  --mat-datepicker-toggle-icon-color: var(--home-muted, #94aaa0);
+  --mat-datepicker-toggle-active-state-icon-color: var(--lime);
+  width: 100%;
+}
+.range-field .mat-mdc-form-field-icon-suffix {
+  --mat-icon-button-state-layer-size: 32px;
+  padding-right: 2px;
+}
+.range-field .mat-datepicker-toggle .mat-mdc-icon-button {
+  padding: 4px;
+}
+.range-field .mat-datepicker-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+// The picker overlay renders outside .tracker-shell, so it can only use :root tokens.
+.mat-datepicker-content:has(.geo-range-picker) {
+  --mat-datepicker-calendar-container-background-color: #143c33;
+  --mat-datepicker-calendar-container-text-color: #f2f6ef;
+  --mat-datepicker-calendar-container-shape: 6px;
+  --mat-datepicker-calendar-body-label-text-color: #94aaa0;
+  --mat-datepicker-calendar-header-text-color: #94aaa0;
+  --mat-datepicker-calendar-header-divider-color: rgb(215 233 222 / 14%);
+  --mat-datepicker-calendar-date-text-color: #f2f6ef;
+  --mat-datepicker-calendar-date-disabled-state-text-color: #5f776d;
+  --mat-datepicker-calendar-date-today-outline-color: #94aaa0;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: var(--forest-dark);
+  --mat-datepicker-calendar-date-hover-state-background-color: rgb(232 245 228 / 8%);
+  --mat-datepicker-calendar-date-focus-state-background-color: rgb(232 245 228 / 12%);
+  --mat-datepicker-calendar-date-selected-state-background-color: var(--lime);
+  --mat-datepicker-calendar-date-selected-state-text-color: var(--forest-dark);
+  --mat-datepicker-calendar-date-in-range-state-background-color: rgb(216 243 106 / 16%);
+  --mat-datepicker-calendar-date-preview-state-outline-color: var(--lime);
+  --mat-datepicker-calendar-period-button-text-color: #f2f6ef;
+  --mat-datepicker-calendar-period-button-icon-color: #f2f6ef;
+  --mat-datepicker-calendar-navigation-button-icon-color: #f2f6ef;
+  --mat-button-text-label-text-color: #f2f6ef;
+  --mat-button-text-state-layer-color: #f2f6ef;
+  --mat-icon-button-state-layer-color: #f2f6ef;
+  border: 1px solid rgb(215 233 222 / 14%);
+}

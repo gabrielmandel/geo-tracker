@@ -1,0 +1,54 @@
+.tracker-shell {
+  --home-bg: #0d302a;
+  --home-sidebar: #0a2823;
+  --home-surface: #143c33;
+  --home-overlay: rgb(13 48 42 / 94%);
+  --home-line: rgb(215 233 222 / 14%);
+  --home-hover: rgb(232 245 228 / 6%);
+  --home-text: #f2f6ef;
+  --home-text-soft: #c9d6cd;
+  --home-muted: #94aaa0;
+  --home-faint: #5f776d;
+  --mat-button-outlined-outline-color: rgb(232 245 228 / 24%);
+  --mat-button-outlined-label-text-color: var(--home-text);
+  --mat-button-outlined-state-layer-color: var(--home-text);
+  --mat-button-outlined-ripple-color: rgb(232 245 228 / 12%);
+  --mat-button-outlined-disabled-outline-color: rgb(232 245 228 / 10%);
+  --mat-button-outlined-disabled-label-text-color: rgb(232 245 228 / 38%);
+  --mat-button-text-label-text-color: var(--home-text);
+  --mat-button-text-state-layer-color: var(--home-text);
+  --mat-button-text-ripple-color: rgb(232 245 228 / 12%);
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: 248px minmax(0, 1fr);
+  color-scheme: dark;
+  color: var(--home-text);
+  background: var(--home-bg);
+}
+.tracker-shell .mat-mdc-unelevated-button.mat-primary {
+  --mat-button-filled-container-color: var(--lime);
+  --mat-button-filled-label-text-color: var(--forest-dark);
+  --mat-button-filled-state-layer-color: var(--forest-dark);
+  --mat-button-filled-ripple-color: rgb(13 48 42 / 14%);
+  --mat-button-filled-disabled-container-color: rgb(232 245 228 / 10%);
+  --mat-button-filled-disabled-label-text-color: rgb(232 245 228 / 38%);
+}
+.shell-content {
+  display: flex;
+  min-width: 0;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+@media (max-width: 1080px) {
+  .tracker-shell {
+    grid-template-columns: 218px minmax(0, 1fr);
+  }
+}
+@media (max-width: 800px) {
+  .tracker-shell {
+    display: block;
+  }
+  .shell-content {
+    min-height: calc(100dvh - 55px);
+  }
+}

@@ -1,0 +1,105 @@
+# Local development stack. Credentials below are development defaults; override them with a .env file.
+name: geo-tracker
+
+services:
+  db:
+    image: postgres:18-alpine
+    # Bulk-load friendly settings for the local stack. synchronous_commit=off never corrupts data; a crash can only
+    # lose the last commits, and each INMET file commits its rows together with its COMPLETED import record.
+    command: ["postgres", "-c", "synchronous_commit=off", "-c", "max_wal_size=4GB"]
+    environment:
+      POSTGRES_DB: ${DB_NAME:-gpstracker}
+      POSTGRES_USER: ${DB_USER:-gpstracker}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gpstracker}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # PostgreSQL 18+ images keep data under /var/lib/postgresql/<version>.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-gpstracker}
+      DB_USER: ${DB_USER:-gpstracker}
+      DB_PASSWORD: ${DB_PASSWORD:-gpstracker}
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health/readiness"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:4200:8080"
+    depends_on:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4:9.18
+    environment:
+      # Desktop mode: no pgAdmin login or master password; the port is only reachable from this machine.
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # Required by the image even though desktop mode never asks for them.
+      PGADMIN_DEFAULT_EMAIL: admin@gpstracker.dev
+      PGADMIN_DEFAULT_PASSWORD: gpstracker
+      PGADMIN_LISTEN_PORT: "5050"
+      PGADMIN_DISABLE_POSTFIX: "true"
+      PGPASS_FILE: /pgadmin4/pgpass
+    configs:
+      - source: pgadmin-servers
+        target: /pgadmin4/servers.json
+      - source: pgadmin-pgpass
+        target: /pgadmin4/pgpass
+    ports:
+      - "127.0.0.1:5050:5050"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
+# pgAdmin imports these only on its first start, while the pgadmin-data volume is empty.
+configs:
+  pgadmin-servers:
+    content: |
+      {
+        "Servers": {
+          "1": {
+            "Name": "GEO TRACKER",
+            "Group": "Servers",
+            "Host": "db",
+            "Port": 5432,
+            "MaintenanceDB": "${DB_NAME:-gpstracker}",
+            "Username": "${DB_USER:-gpstracker}",
+            "ConnectionParameters": {
+              "sslmode": "prefer",
+              "connect_timeout": 10,
+              "passfile": "/var/lib/pgadmin/.pgpass"
+            }
+          }
+        }
+      }
+  pgadmin-pgpass:
+    content: |
+      db:5432:*:${DB_USER:-gpstracker}:${DB_PASSWORD:-gpstracker}
+
+volumes:
+  db-data:
+    name: gps-tracker_db-data
+  pgadmin-data:
+    name: gps-tracker_pgadmin-data

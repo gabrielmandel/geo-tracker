@@ -1,0 +1,36 @@
+spring:
+  profiles:
+    default: dev
+  application:
+    name: geo-tracker-api
+  servlet:
+    multipart:
+      # Sized for INMET yearly ZIPs (~130 MB in 2026); single CSVs have their own 20 MB limit in the service.
+      max-file-size: 512MB
+      max-request-size: 512MB
+
+server:
+  servlet:
+    context-path: /api
+  # Behind nginx/Caddy: trust X-Forwarded-* from internal proxies so generated URLs keep the public host.
+  forward-headers-strategy: native
+  compression:
+    enabled: true
+    mime-types: application/json,application/problem+json,application/geo+json,text/csv,text/plain
+    min-response-size: 2KB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /docs
+    operations-sorter: alpha
+    tags-sorter: alpha

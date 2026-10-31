@@ -1,0 +1,469 @@
+.login-page {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+  background: #f7f8f5;
+}
+.brand-panel {
+  position: relative;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 34px 6vw 28px;
+  isolation: isolate;
+  color: #f5f8f1;
+  background: var(--forest-dark);
+}
+.brand-panel::before,
+.brand-panel::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgb(216 243 106 / 9%);
+  border-radius: 50%;
+  content: '';
+}
+.brand-panel::before {
+  top: -30%;
+  left: 13%;
+  width: 960px;
+  aspect-ratio: 1;
+}
+.brand-panel::after {
+  top: -21%;
+  left: 21%;
+  width: 790px;
+  aspect-ratio: 1;
+}
+.brand-topline,
+.brand-lockup,
+.brand-footer,
+.form-panel-top,
+.form-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand-lockup {
+  justify-content: flex-start;
+  gap: 11px;
+  color: #f5f8f1;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.brand-lockup-light {
+  color: #b2c6ba;
+  font-weight: 500;
+}
+.brand-mark {
+  display: grid;
+  width: 34px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(216 243 106 / 42%);
+  border-radius: 9px;
+  color: var(--lime);
+  font-size: 19px;
+}
+.brand-index,
+.brand-footer,
+.form-panel-top,
+.form-panel-footer {
+  color: #94aaa0;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+.brand-index span {
+  margin-left: 18px;
+  color: var(--lime);
+}
+.brand-copy {
+  z-index: 1;
+  margin: 88px 0 22px;
+}
+.eyebrow {
+  margin: 0;
+  color: #a6c1b2;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+}
+.eyebrow > span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 12px rgb(216 243 106 / 75%);
+}
+.brand-copy h1 {
+  margin: 22px 0 18px;
+  color: #f2f6ef;
+  font-family: 'Manrope', sans-serif;
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 1.04;
+}
+.brand-copy h1 em {
+  color: var(--lime);
+  font-weight: 500;
+}
+.brand-description {
+  max-width: 390px;
+  color: #b5c4ba;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.signal-visual {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  max-height: 380px;
+  margin: 4px 0 28px;
+  overflow: hidden;
+  border: 1px solid rgb(215 233 222 / 15%);
+  border-radius: 4px;
+  background-color: #143c33;
+  background-image:
+    linear-gradient(rgb(232 245 228 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(232 245 228 / 4%) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+.signal-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.33;
+  background: repeating-radial-gradient(
+    ellipse at 50% 47%,
+    transparent 0 27px,
+    rgb(201 230 189 / 22%) 28px 29px,
+    transparent 30px 43px
+  );
+}
+.globe-visual {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  width: 96%;
+  height: min(88%, 340px);
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+.globe-line {
+  fill: none;
+  stroke: rgb(216 243 106 / 20%);
+  stroke-width: 0.7;
+}
+.globe-equator {
+  stroke: rgb(216 243 106 / 42%);
+}
+.globe-land {
+  fill: none;
+  stroke: rgb(216 243 106 / 72%);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+.globe-marker {
+  opacity: 0;
+}
+.moon-orbit {
+  fill: none;
+  stroke: rgb(232 245 228 / 18%);
+  stroke-dasharray: 1 6;
+  stroke-linecap: round;
+}
+.moon-orbit-front {
+  stroke: rgb(232 245 228 / 32%);
+}
+.moon-line {
+  fill: none;
+  stroke: rgb(232 245 228 / 20%);
+  stroke-width: 0.5;
+}
+.moon-crater {
+  fill: rgb(232 245 228 / 10%);
+  stroke: rgb(232 245 228 / 62%);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+.moon-limb {
+  fill: none;
+  stroke: rgb(232 245 228 / 45%);
+  stroke-width: 0.8;
+}
+.globe-limb {
+  fill: none;
+  stroke: rgb(216 243 106 / 45%);
+  stroke-width: 1;
+}
+.orbit-back {
+  fill: none;
+  stroke: rgb(216 243 106 / 24%);
+  stroke-dasharray: 2 5;
+}
+.orbit-front {
+  fill: none;
+  stroke: rgb(216 243 106 / 55%);
+}
+.globe-signal {
+  fill: rgb(216 243 106 / 60%);
+}
+.globe-ping-glow {
+  fill: rgb(216 243 106 / 18%);
+}
+.globe-ping-core {
+  fill: var(--lime);
+}
+.globe-ping-pulse {
+  fill: none;
+  stroke: var(--lime);
+  opacity: 0.45;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: globe-ping 2.8s ease-out infinite;
+}
+.globe-ping-pulse-delayed {
+  animation-delay: -1.4s;
+}
+.globe-satellite rect {
+  fill: #eef5e8;
+}
+.globe-satellite .satellite-panel {
+  fill: rgb(216 243 106 / 85%);
+}
+@keyframes globe-ping {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4);
+  }
+}
+.coordinate {
+  position: absolute;
+  color: #c0d0c1;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  line-height: 1.7;
+}
+.coordinate-a {
+  top: 15%;
+  left: 7%;
+}
+.coordinate-b {
+  right: 7%;
+  bottom: 17%;
+  color: var(--lime);
+}
+.signal-caption {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aabdb0;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+}
+.signal-caption > span:last-child {
+  margin-left: auto;
+}
+.signal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a9d77b;
+}
+.brand-footer {
+  padding-top: 14px;
+  border-top: 1px solid rgb(215 233 222 / 14%);
+}
+.form-panel {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 34px 54px 28px;
+}
+.form-panel-top {
+  color: #81908a;
+}
+.form-panel-top span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--forest);
+}
+.form-panel-top ng-icon {
+  color: #5c9977;
+  font-size: 14px;
+}
+.login-card {
+  width: min(100%, 390px);
+  align-self: center;
+  margin: 36px 0;
+  animation: rise-in 480ms ease-out both;
+}
+.mobile-brand {
+  display: none;
+}
+.form-eyebrow {
+  color: #438065;
+}
+.login-card h2 {
+  margin: 16px 0 10px;
+  color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.12;
+}
+.form-intro {
+  margin: 0 0 34px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.field-label {
+  color: #60716b;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+.login-field {
+  display: block;
+  margin-top: 8px;
+  width: 100%;
+}
+.login-field input {
+  font-size: 13px;
+}
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+  width: 100%;
+}
+.text-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #458267;
+  cursor: pointer;
+  font-size: 11px;
+}
+.connect-button {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  justify-content: space-between;
+  padding: 0 17px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 9px;
+}
+.connect-button ng-icon {
+  font-size: 17px;
+}
+.login-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 22px 0 0;
+  color: #7b8982;
+  font-size: 10px;
+}
+.login-note ng-icon {
+  color: #589170;
+  font-size: 14px;
+}
+.form-panel-footer {
+  color: #85918b;
+}
+.form-panel-footer a {
+  color: #4a7f66;
+  text-decoration: none;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 960px) {
+  .login-page {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr);
+  }
+  .brand-panel {
+    padding-inline: 36px;
+  }
+  .brand-index {
+    font-size: 8px;
+  }
+  .brand-copy h1 {
+    font-size: 52px;
+  }
+  .form-panel {
+    padding-inline: 34px;
+  }
+}
+@media (max-width: 720px) {
+  .login-page {
+    display: block;
+    min-height: 100dvh;
+    background: #f7f8f5;
+  }
+  .brand-panel {
+    display: none;
+  }
+  .form-panel {
+    min-height: 100dvh;
+    padding: 22px 24px 20px;
+  }
+  .form-panel-top {
+    font-size: 8px;
+  }
+  .login-card {
+    margin: 40px auto;
+  }
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 54px;
+    color: var(--forest);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .mobile-brand .brand-mark {
+    width: 30px;
+    color: var(--forest);
+    border-color: #b8d2c2;
+  }
+  .login-card h2 {
+    font-size: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .globe-satellite {
+    display: none;
+  }
+}

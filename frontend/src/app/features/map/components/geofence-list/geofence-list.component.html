@@ -1,0 +1,19 @@
+<div class="panel-heading">
+  <span>POLYGONS</span><span class="count-badge">{{ geofences().length }}</span>
+</div>
+<div class="geofence-list">
+  @for (geofence of geofences(); track geofence.id; let index = $index) {
+    <button
+      class="geofence-item"
+      type="button"
+      [class.is-selected]="geofence.id === selectedId()"
+      [attr.aria-pressed]="geofence.id === selectedId()"
+      (click)="geofenceSelected.emit(geofence.id)">
+      <span class="zone-swatch" [class]="'swatch-' + (index % 3)"></span>
+      <span class="zone-copy"><strong>{{ geofence.name }}</strong><small>{{ geofence.updatedAt }}</small></span>
+      <span class="zone-chevron">›</span>
+    </button>
+  } @empty {
+    <p class="panel-empty">Load saved boundaries to view them here.</p>
+  }
+</div>

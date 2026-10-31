@@ -1,0 +1,171 @@
+.sidebar {
+  position: relative;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  padding: 24px 14px 14px;
+  border-right: 1px solid var(--home-line);
+  background: var(--home-sidebar);
+}
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 28px;
+  color: var(--home-text);
+  text-decoration: none;
+}
+.app-mark {
+  display: grid;
+  width: 32px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 9px;
+  background: rgb(216 243 106 / 12%);
+  color: var(--lime);
+  font-size: 17px;
+}
+.app-wordmark {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+.app-wordmark span {
+  color: #b2c6ba;
+  font-weight: 500;
+}
+.side-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 31px 8px 11px;
+  color: var(--home-muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+.section-line {
+  height: 1px;
+  flex: 1;
+  background: var(--home-line);
+}
+.side-nav {
+  display: grid;
+  gap: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 3px;
+  color: var(--home-text-soft);
+  font-size: 10px;
+  text-decoration: none;
+}
+.nav-item ng-icon {
+  font-size: 15px;
+}
+.nav-active {
+  background: rgb(216 243 106 / 10%);
+  color: var(--lime);
+  font-weight: 600;
+}
+.nav-item kbd,
+.nav-soon {
+  margin-left: auto;
+  color: var(--home-muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+}
+.nav-soon {
+  padding: 3px 4px;
+  border-radius: 2px;
+  background: rgb(232 245 228 / 8%);
+}
+.sidebar-bottom {
+  margin-top: auto;
+}
+.sync-status,
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid var(--home-line);
+}
+.sync-status {
+  padding: 13px 8px;
+}
+.profile-row {
+  padding: 12px 8px 3px;
+  color: inherit;
+  text-decoration: none;
+}
+.sync-status > span:nth-child(2),
+.profile-row > span:nth-child(2) {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+.sync-status strong,
+.profile-row strong {
+  overflow: hidden;
+  color: var(--home-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sync-status small,
+.profile-row small {
+  color: var(--home-muted);
+  font-size: 9px;
+}
+.sync-status > ng-icon {
+  color: #a9d77b;
+  font-size: 15px;
+}
+.sync-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #a9d77b;
+  box-shadow: 0 0 0 3px rgb(169 215 123 / 16%);
+}
+.profile-avatar {
+  display: grid;
+  width: 31px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8d8c3;
+  color: #70523b;
+  font-family: 'Manrope', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+.profile-menu {
+  color: var(--home-muted);
+  font-size: 18px;
+}
+@media (max-width: 800px) {
+  .sidebar {
+    min-height: auto;
+    height: 55px;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--home-line);
+  }
+  .app-brand {
+    padding: 0;
+  }
+  .side-section-heading,
+  .side-nav,
+  .sidebar-bottom {
+    display: none;
+  }
+}

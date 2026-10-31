@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+# Bulk-write endpoints are closed unless ADMIN_TOKEN is set (sent as X-Admin-Token).
+geo:
+  admin:
+    open: false
+    token: ${ADMIN_TOKEN:}
+  inmet-sync:
+    enabled: ${INMET_SYNC_ENABLED:false}
+
+# One JSON object per line, ready for log collectors.
+logging:
+  structured:
+    format:
+      console: ecs

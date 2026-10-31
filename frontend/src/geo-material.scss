@@ -1,0 +1,86 @@
+// Dark green look for Material controls. Literal fallbacks: dialogs and overlays render outside .tracker-shell.
+
+.tracker-shell,
+.cdk-overlay-container {
+  scrollbar-color: rgb(216 243 106 / 70%) #0a2823;
+  scrollbar-width: thin;
+}
+// Safari ignores scrollbar-color.
+.tracker-shell ::-webkit-scrollbar,
+.cdk-overlay-container ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.tracker-shell ::-webkit-scrollbar-track,
+.tracker-shell ::-webkit-scrollbar-corner,
+.cdk-overlay-container ::-webkit-scrollbar-track,
+.cdk-overlay-container ::-webkit-scrollbar-corner {
+  background: #0a2823;
+}
+.tracker-shell ::-webkit-scrollbar-thumb,
+.cdk-overlay-container ::-webkit-scrollbar-thumb {
+  border: 2px solid #0a2823;
+  border-radius: 6px;
+  background: rgb(216 243 106 / 70%);
+}
+
+.geo-field {
+  --mat-form-field-container-height: 38px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-container-text-size: 11px;
+  --mat-form-field-container-text-line-height: 20px;
+  --mat-form-field-outlined-container-shape: 4px;
+  --mat-form-field-outlined-outline-color: rgb(232 245 228 / 22%);
+  --mat-form-field-outlined-hover-outline-color: rgb(232 245 228 / 45%);
+  --mat-form-field-outlined-focus-outline-color: var(--lime);
+  --mat-form-field-outlined-focus-outline-width: 1px;
+  --mat-form-field-outlined-input-text-color: var(--home-text, #f2f6ef);
+  --mat-form-field-outlined-input-text-placeholder-color: var(--home-faint, #5f776d);
+  --mat-form-field-outlined-caret-color: var(--lime);
+  --mat-form-field-outlined-error-outline-color: #e98267;
+  --mat-form-field-outlined-error-hover-outline-color: #e98267;
+  --mat-form-field-outlined-error-focus-outline-color: #e98267;
+  --mat-select-enabled-trigger-text-color: var(--home-text, #f2f6ef);
+  --mat-select-enabled-arrow-color: var(--home-muted, #94aaa0);
+  --mat-select-focused-arrow-color: var(--lime);
+  --mat-select-trigger-text-size: 11px;
+  --mat-icon-button-state-layer-color: var(--home-text, #f2f6ef);
+}
+
+.geo-select-panel {
+  --mat-select-panel-background-color: #143c33;
+  --mat-option-label-text-color: #f2f6ef;
+  --mat-option-label-text-size: 12px;
+  --mat-option-hover-state-layer-color: rgb(232 245 228 / 8%);
+  --mat-option-focus-state-layer-color: rgb(232 245 228 / 12%);
+  --mat-option-selected-state-layer-color: rgb(216 243 106 / 16%);
+  --mat-option-selected-state-label-text-color: var(--lime);
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--lime);
+  border: 1px solid rgb(215 233 222 / 14%);
+}
+
+.geo-table {
+  --mat-table-background-color: transparent;
+  --mat-table-header-headline-color: #b7cbbf;
+  --mat-table-header-headline-font: 'DM Mono', monospace;
+  --mat-table-header-headline-size: 9px;
+  --mat-table-header-headline-weight: 500;
+  --mat-table-header-container-height: 34px;
+  --mat-table-row-item-label-text-color: #e4ede6;
+  --mat-table-row-item-label-text-size: 11px;
+  --mat-table-row-item-container-height: 32px;
+  --mat-table-row-item-outline-color: rgb(215 233 222 / 9%);
+  width: 100%;
+  white-space: nowrap;
+}
+// The sticky header needs an opaque background to hide rows scrolling under it.
+.geo-table .mat-mdc-header-cell {
+  background: #174238;
+}
+.geo-table .mat-mdc-header-cell,
+.geo-table .mat-mdc-cell {
+  padding: 0 11px;
+}
+.geo-table .mat-mdc-row:hover .mat-mdc-cell {
+  background: rgb(232 245 228 / 5%);
+}

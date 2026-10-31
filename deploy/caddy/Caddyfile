@@ -1,0 +1,10 @@
+# Automatic HTTPS (Let's Encrypt) for $DOMAIN; the frontend container serves the app and proxies /api.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy frontend:8080
+}

@@ -1,0 +1,153 @@
+<header class="topbar">
+  <div class="breadcrumbs">
+    <span>MONITOR</span><b>/</b><strong>Weather Stations map</strong>
+  </div>
+  <div class="topbar-actions">
+    <span class="live-indicator"><i></i> LIVE</span><span class="topbar-date">WED, SEP 30</span>
+    <button mat-stroked-button class="help-button" matTooltip="Workspace help">
+      Help <span class="help-glyph">?</span>
+    </button>
+    <button class="avatar-button" matTooltip="Jordan Davis">JD</button>
+  </div>
+</header>
+<div class="map-heading">
+  <div>
+    <p class="page-kicker">GEOLOGIC DATA <span>·</span> BRAZIL</p>
+    <h1>Weather Stations map</h1>
+    <p class="page-subtitle">Explore station coverage and the boundaries around your field operations.</p>
+  </div>
+  <div class="map-metrics">
+    <div>
+      <span>STATIONS WITH RECENT DATA</span>
+      <strong>{{ stationsLoading() ? '—' : stationsWithRecentData() }} <small>/ {{ filteredStations().length }}</small></strong>
+    </div>
+    @if (geofencesEnabled) {
+      <div>
+        <span>POLYGONS</span><strong>{{ geofences().length.toString().padStart(2, '0') }}</strong>
+      </div>
+    }
+    @if (rMap(); as current) {
+      <div>
+        <span>R FACTOR · {{ rPeriod() }}</span><strong>{{ current.stats.stations }} <small>stations</small></strong>
+      </div>
+    }
+    <div class="metric-live">
+      <span>LAST UPDATED</span><strong><i></i> {{ (stationsLoadedAt() | date: 'HH:mm') ?? '—' }}</strong>
+    </div>
+  </div>
+</div>
+<div class="map-body">
+  <aside class="map-panel" aria-label="Map data">
+    @if (geofencesEnabled) {
+      <app-geofence-list
+        [geofences]="geofences()"
+        [selectedId]="selectedGeofenceId()"
+        (geofenceSelected)="focusGeofence($event)" />
+    }
+    <app-station-layers
+      [stationCount]="filteredStations().length"
+      [visible]="stationVisible()"
+      [minimumAgeYears]="minimumAgeYears()"
+      [operatingRange]="operatingRange()"
+      [loading]="stationsLoading()"
+      (visibilityChange)="setStationVisibility($event)"
+      (minimumAgeYearsChange)="setMinimumAgeYears($event)"
+      (operatingRangeChange)="setOperatingRange($event)" />
+  </aside>
+  <section class="map-column">
+    <div class="map-toolbar">
+      <div class="map-tools">
+        <button
+          [matButton]="rPanelOpen() ? 'filled' : 'outlined'"
+          type="button"
+          class="tool-button"
+          [attr.aria-pressed]="rPanelOpen()"
+          (click)="toggleRFactorMap()">
+          <ng-icon matButtonIcon name="lucideGrid3x3" />
+          R factor map
+        </button>
+        @if (geofencesEnabled) {
+          <button matButton="outlined" type="button" class="tool-button" (click)="loadGeofences()" [disabled]="loading()">
+            <ng-icon matButtonIcon name="lucideLayers" />
+            {{ loading() ? 'Loading…' : 'Load geofences' }}
+          </button>
+          <button
+            matButton="filled"
+            color="primary"
+            type="button"
+            class="tool-button"
+            (click)="startDrawing()"
+            [disabled]="drawing() || !!pendingCoordinates()">
+            <ng-icon matButtonIcon name="lucidePlus" />
+            Draw polygon
+          </button>
+        }
+      </div>
+      <span class="toolbar-source" [class.is-loading]="stationsLoading()">
+        <i></i> DATABASE ·
+        @if (stationsLoading()) {
+          loading stations…
+        } @else if (filteredStations().length !== stations().length) {
+          {{ filteredStations().length }} of {{ stations().length }} stations
+        } @else {
+          {{ stations().length }} stations
+        }
+      </span>
+    </div>
+    <div class="map-frame">
+      <div id="operations-map" class="map-canvas" role="application" aria-label="Interactive weather station map"></div>
+      @if (drawing()) {
+        <div class="drawing-hint">
+          <span class="drawing-pulse"> </span>
+          DRAW MODE
+          <span> Click to place points · double-click to finish </span>
+          <button type="button" (click)="cancelDrawing()" aria-label="Cancel drawing">×</button>
+        </div>
+      }
+      @if (pendingCoordinates()) {
+        <form class="save-panel" (ngSubmit)="saveGeofence()">
+          <div class="save-panel-heading">
+            <span class="save-icon"><ng-icon name="lucidePlus" /></span>
+            <span><strong>New boundary</strong><small>{{ pendingCoordinates()?.length }} polygon points</small></span>
+            <button type="button" (click)="cancelDrawing()" aria-label="Discard polygon">×</button>
+          </div>
+          <label for="geofence-name">BOUNDARY NAME</label>
+          <input id="geofence-name" name="geofenceName" [(ngModel)]="newGeofenceName" required maxlength="48" />
+          <div class="save-actions">
+            <button mat-button type="button" (click)="cancelDrawing()">Discard</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="!newGeofenceName.trim()">
+              Save boundary
+            </button>
+          </div>
+        </form>
+      }
+      @if (!rPanelOpen()) {
+        <div class="map-legend">
+          <span class="legend-heading">STATION DATA</span>
+          <span><i class="legend-active"></i> Updated in 90 days</span>
+          <span><i class="legend-draft"></i> Older record</span>
+        </div>
+      }
+      @if (rPanelOpen()) {
+        <app-r-factor-panel
+          [cache]="rCache()"
+          [map]="rMap()"
+          [loading]="rLoading()"
+          [error]="rError()"
+          [style]="rStyle()"
+          [exports]="rExports()"
+          (generate)="generateRFactorMap($event)"
+          (styleChange)="setRasterStyle($event)"
+          (refreshCache)="refreshRCache()"
+          (closed)="closeRFactorMap()" />
+        @if (rMap()) {
+          <app-r-factor-legend [classes]="rClasses()" [period]="rPeriod()" [hoverValue]="rHoverValue()" />
+        }
+      }
+    </div>
+  </section>
+</div>
+<footer class="map-status">
+  <span class="status-left"><i></i> {{ notice() }}</span>
+  <span>MAP DATA © OPENSTREETMAP · STATIONS © INMET VIA GEO TRACKER · BORDERS © IBGE</span>
+</footer>

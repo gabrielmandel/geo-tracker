@@ -1,0 +1,149 @@
+<header class="r-panel__header">
+  <span class="r-panel__title"><ng-icon name="lucideGrid3x3" /> R FACTOR MAP</span>
+  <span class="r-panel__actions">
+    <button
+      type="button"
+      class="r-panel__close"
+      [attr.aria-label]="collapsed() ? 'Expand R factor settings' : 'Collapse R factor settings'"
+      [attr.aria-expanded]="!collapsed()"
+      (click)="collapsed.set(!collapsed())">
+      <ng-icon [name]="collapsed() ? 'lucideChevronDown' : 'lucideChevronUp'" />
+    </button>
+    <button type="button" class="r-panel__close" aria-label="Close R factor map" (click)="closed.emit()">
+      <ng-icon name="lucideX" />
+    </button>
+  </span>
+</header>
+
+<div class="r-panel__body" [hidden]="collapsed()">
+  <section class="r-panel__cache">
+    @if (refreshing()) {
+      <span>Building annual erosivity · {{ cache()?.latestRefresh?.stationsDone }} / {{ cache()?.latestRefresh?.stationsTotal ?? '…' }} stations</span>
+      <mat-progress-bar class="r-progress" mode="determinate" [value]="refreshProgress()" />
+    } @else if (cache(); as status) {
+      <span>
+        {{ status.cachedStations }} stations cached
+        @if (status.firstYear) { · {{ status.firstYear }}–{{ status.lastYear }} }
+        @if (status.staleStations) { · <b>{{ status.staleStations }} stale</b> }
+      </span>
+      @if (status.staleStations) {
+        <button type="button" class="r-panel__link" (click)="refreshCache.emit()">Update</button>
+      }
+    } @else {
+      <span>Loading cache status…</span>
+    }
+  </section>
+
+  <section class="r-panel__group">
+    <span class="r-panel__label">PERIOD</span>
+    <div class="r-panel__row">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+        <mat-select [value]="fromYear()" (selectionChange)="fromYear.set($event.value)" panelClass="geo-select-panel" aria-label="First year">
+          @for (year of years(); track year) { <mat-option [value]="year">{{ year }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <span class="r-panel__to">to</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+        <mat-select [value]="toYear()" (selectionChange)="toYear.set($event.value)" panelClass="geo-select-panel" aria-label="Last year">
+          @for (year of years(); track year) { <mat-option [value]="year">{{ year }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    @if (periodInvalid()) { <small class="r-panel__error">The first year must not be after the last.</small> }
+  </section>
+
+  <section class="r-panel__group">
+    <span class="r-panel__label">DATA QUALITY</span>
+    <div class="r-panel__row">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field" matTooltip="Share of hours with a rain reading for a year to count">
+        <mat-select [value]="minCoverage()" (selectionChange)="minCoverage.set($event.value)" panelClass="geo-select-panel" aria-label="Minimum yearly coverage">
+          @for (coverage of coverages; track coverage) { <mat-option [value]="coverage">≥ {{ coverage * 100 }}% hours</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field" matTooltip="Valid years a station needs (empty = automatic)">
+        <input #minYearsInput matInput type="number" min="1" placeholder="Auto" aria-label="Minimum valid years"
+          [value]="minYears() ?? ''" (change)="setMinYears(minYearsInput.value)" />
+        <span matTextSuffix>yrs</span>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="r-panel__group">
+    <span class="r-panel__label">IDW INTERPOLATION</span>
+    <div class="r-panel__row r-panel__row--three">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field" matTooltip="Pixel size">
+        <mat-select [value]="cellSize()" (selectionChange)="cellSize.set($event.value)" panelClass="geo-select-panel" aria-label="Pixel size">
+          @for (size of cellSizes; track size) { <mat-option [value]="size">{{ size }}°</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field" matTooltip="Distance power">
+        <mat-select [value]="power()" (selectionChange)="power.set($event.value)" panelClass="geo-select-panel" aria-label="IDW power">
+          @for (value of powers; track value) { <mat-option [value]="value">p = {{ value }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field" matTooltip="Search radius">
+        <mat-select [value]="maxDistanceKm()" (selectionChange)="maxDistanceKm.set($event.value)" panelClass="geo-select-panel" aria-label="Search radius">
+          @for (distance of distances; track distance) { <mat-option [value]="distance">{{ distance }} km</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <button matButton="filled" type="button" class="r-panel__generate" (click)="submit()" [disabled]="loading() || periodInvalid()">
+    {{ loading() ? 'Interpolating…' : map() ? 'Update map' : 'Generate map' }}
+  </button>
+  @if (loading()) { <mat-progress-bar class="r-progress" mode="indeterminate" /> }
+  @if (error()) { <p class="r-panel__error">{{ error() }}</p> }
+
+  @if (map(); as current) {
+    <section class="r-panel__stats">
+      <div><span>STATIONS</span><strong>{{ current.stats.stations }}</strong></div>
+      <div><span>MIN</span><strong>{{ current.stats.min | number: '1.0-0' }}</strong></div>
+      <div><span>MEAN</span><strong>{{ current.stats.mean | number: '1.0-0' }}</strong></div>
+      <div><span>MAX</span><strong>{{ current.stats.max | number: '1.0-0' }}</strong></div>
+    </section>
+
+    <section class="r-panel__group">
+      <span class="r-panel__label">STYLE</span>
+      <div class="r-panel__row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <mat-select [value]="style().ramp" (selectionChange)="updateStyle({ ramp: $event.value })" panelClass="geo-select-panel" aria-label="Color ramp">
+            <mat-select-trigger><span class="r-ramp-swatch" [style.background]="gradient(style().ramp)"></span></mat-select-trigger>
+            @for (ramp of ramps; track ramp) {
+              <mat-option [value]="ramp"><span class="r-ramp-swatch" [style.background]="gradient(ramp)"></span> {{ ramp }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <mat-select [value]="style().mode + ':' + style().classes" panelClass="geo-select-panel" aria-label="Classification"
+            (selectionChange)="updateStyle({ mode: $event.value.split(':')[0], classes: +$event.value.split(':')[1] })">
+            @for (option of ['quantile:5', 'quantile:7', 'quantile:9', 'equal:5', 'equal:7', 'equal:9']; track option) {
+              <mat-option [value]="option">{{ option.split(':')[1] }} {{ option.startsWith('quantile') ? 'quantiles' : 'equal intervals' }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <label class="r-panel__slider">
+        <span>Opacity {{ style().opacity * 100 | number: '1.0-0' }}%</span>
+        <mat-slider class="r-slider" min="0.1" max="1" step="0.05" discrete="false">
+          <input matSliderThumb [value]="style().opacity" (valueChange)="updateStyle({ opacity: $event })" aria-label="Raster opacity" />
+        </mat-slider>
+      </label>
+      <div class="r-panel__toggles">
+        <label><input type="checkbox" [checked]="style().showStations" (change)="updateStyle({ showStations: $any($event.target).checked })" /> Station R values</label>
+        <label><input type="checkbox" [checked]="style().showStates" (change)="updateStyle({ showStates: $any($event.target).checked })" /> State borders</label>
+      </div>
+    </section>
+
+    @if (exports(); as links) {
+      <section class="r-panel__group">
+        <span class="r-panel__label">EXPORT (QGIS · TERRSET)</span>
+        <div class="r-panel__exports">
+          <a [href]="links.grid" download matTooltip="ESRI ASCII grid + WGS 84 .prj">Raster .asc</a>
+          <a [href]="links.stationsGeoJson" download matTooltip="Station points with R">GeoJSON</a>
+          <a [href]="links.stationsCsv" download matTooltip="Station table with R">CSV</a>
+        </div>
+      </section>
+    }
+  }
+</div>

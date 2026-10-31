@@ -1,0 +1,47 @@
+<div class="panel-heading">
+  <span>WEATHER STATIONS</span><span class="panel-source">GEO TRACKER</span>
+</div>
+<div class="layer-list">
+  <label class="layer-toggle">
+    <span class="layer-swatch layer-swatch-automatic"></span>
+    <span class="layer-copy">
+      <strong>Database stations</strong>
+      <small>{{ loading() ? 'Loading…' : stationCount() + ' points' }}</small>
+    </span>
+    <input #toggle type="checkbox" [checked]="visible()" (change)="visibilityChange.emit(toggle.checked)" />
+  </label>
+  <p class="layer-note"><span class="layer-swatch layer-swatch-down"></span> No recent import data</p>
+</div>
+<div class="age-filter">
+  <label for="station-age">Filter by X years OLD</label>
+  <div class="age-input-row">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field age-field">
+      <input
+        #ageInput
+        matInput
+        id="station-age"
+        type="number"
+        min="1"
+        max="200"
+        step="1"
+        [value]="minimumAgeYears() ?? ''"
+        placeholder="Any"
+        (change)="setMinimumAge(ageInput.value)" />
+    </mat-form-field>
+    <span>years or older</span>
+  </div>
+  @if (invalidAge()) { <small class="age-filter-error">Enter a whole number from 1 to 200.</small> }
+</div>
+<div class="range-filter">
+  <div class="range-heading">
+    <span>FOUNDATION DATE</span>
+    @if (operatingRange().start || operatingRange().end) {
+      <button type="button" class="range-clear" (click)="clearRange()">Clear</button>
+    }
+  </div>
+  <app-date-range-field
+    [range]="operatingRange()"
+    [max]="today"
+    ariaLabel="Station foundation date range"
+    (rangeChange)="operatingRangeChange.emit($event)" />
+</div>

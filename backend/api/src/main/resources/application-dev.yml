@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gpstracker}
+    username: ${DB_USER:gpstracker}
+    password: ${DB_PASSWORD:gpstracker}
+
+# Local stack: uploads, cache refreshes and syncs need no admin token.
+geo:
+  admin:
+    open: true

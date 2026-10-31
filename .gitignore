@@ -1,0 +1,20 @@
+# INMET yearly ZIPs (~2.7 GB): download them again from portal.inmet.gov.br or let the INMET sync fetch them.
+docs/inmet-files/
+
+# Local secrets for Compose (see deploy/.env.example) and database dumps of the backup service.
+.env
+deploy/.env
+deploy/backups/
+
+# Build output (frontend/ and backend/ have their own .gitignore for tool-specific files).
+**/build/
+**/dist/
+**/node_modules/
+.angular/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+# Personal editor settings (Azure deployment target); tasks.json and launch.json are shared.
+.vscode/settings.json

@@ -1,0 +1,45 @@
+@import 'leaflet/dist/leaflet.css';
+@import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+:root {
+	color-scheme: light;
+	--ink: #172b2a;
+	--muted: #647471;
+	--paper: #f2f5f1;
+	--forest: #164b3d;
+	--forest-dark: #0d302a;
+	--lime: #d8f36a;
+	--coral: #e98267;
+	--mat-sys-body-large-font: 'DM Sans', sans-serif;
+	--mat-sys-body-medium-font: 'DM Sans', sans-serif;
+	--mat-sys-body-small-font: 'DM Sans', sans-serif;
+	--mat-sys-label-large-font: 'DM Sans', sans-serif;
+	--mat-sys-label-medium-font: 'DM Sans', sans-serif;
+	--mat-sys-label-small-font: 'DM Sans', sans-serif;
+	--mat-sys-title-large-font: 'DM Sans', sans-serif;
+	--mat-sys-title-medium-font: 'DM Sans', sans-serif;
+	--mat-sys-title-small-font: 'DM Sans', sans-serif;
+	font-family: 'DM Sans', 'Avenir Next', sans-serif;
+	background: var(--paper);
+	color: var(--ink);
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+html, body { min-width: 320px; min-height: 100%; margin: 0; }
+button, input { font: inherit; }
+.mat-mdc-unelevated-button.mat-primary {
+	--mat-button-filled-container-color: var(--forest);
+	--mat-button-filled-label-text-color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
+}

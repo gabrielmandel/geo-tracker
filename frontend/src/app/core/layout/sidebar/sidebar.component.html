@@ -1,0 +1,27 @@
+<aside class="sidebar">
+  <a class="app-brand" routerLink="/home" aria-label="Geo Tracker home">
+    <span class="app-mark"><ng-icon name="lucideMapPin" /></span>
+    <span class="app-wordmark">GEO <span>TRACKER</span></span>
+  </a>
+  <div class="side-section-heading"><span>MONITOR</span><span class="section-line"></span></div>
+  <nav class="side-nav" aria-label="Main navigation">
+    <a class="nav-item" routerLink="/home" routerLinkActive="nav-active" ariaCurrentWhenActive="page">
+      <ng-icon name="lucideMap" /><span>Weather Stations map</span><kbd>⌘ 1</kbd>
+    </a>
+    <a class="nav-item" href="#assets" (click)="$event.preventDefault()">
+      <ng-icon name="lucideActivity" /><span>Asset activity</span><span class="nav-soon">SOON</span>
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sync-status">
+      <span class="sync-dot"></span>
+      <span><strong>All systems normal</strong><small>Last sync 2 min ago</small></span>
+      <ng-icon name="lucideShieldCheck" />
+    </div>
+    <a class="profile-row" routerLink="/login">
+      <span class="profile-avatar">?</span>
+      <span><strong>User</strong><small>Fleet manager</small></span>
+      <span class="profile-menu">···</span>
+    </a>
+  </div>
+</aside>

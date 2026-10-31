@@ -1,0 +1,123 @@
+<main class="login-page">
+  <section class="brand-panel" aria-label="GEO TRACKER">
+    <div class="brand-topline">
+      <a class="brand-lockup" routerLink="/login" aria-label="GEO TRACKER sign in">
+        <span class="brand-mark"><ng-icon name="lucideMapPin" /></span>
+        <span>GEO <span class="brand-lockup-light">TRACKER</span></span>
+      </a>
+      <span class="brand-index">OPERATIONS PLATFORM <span>01 / 03</span></span>
+    </div>
+    <div class="brand-copy">
+      <p class="eyebrow"><span></span> LIVE FLEET INTELLIGENCE</p>
+      <h1>Know where<br />everything <em>belongs.</em></h1>
+      <p class="brand-description">A clearer view of your sites, assets, and the boundaries that keep work moving.</p>
+    </div>
+    <div class="signal-visual" aria-hidden="true">
+      <div class="signal-grid"></div>
+      <svg class="globe-visual" viewBox="0 0 600 320">
+        <defs>
+          <radialGradient id="globe-body-fill" cx="0.36" cy="0.3" r="0.78">
+            <stop offset="0" stop-color="#2d6d57" />
+            <stop offset="0.55" stop-color="#174637" />
+            <stop offset="1" stop-color="#0a251f" />
+          </radialGradient>
+          <radialGradient id="globe-atmosphere">
+            <stop offset="0.78" stop-color="#d8f36a" stop-opacity="0" />
+            <stop offset="0.83" stop-color="#d8f36a" stop-opacity="0.22" />
+            <stop offset="1" stop-color="#d8f36a" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="globe-night" x1="0.15" y1="0.1" x2="0.85" y2="0.95">
+            <stop offset="0.45" stop-color="#03120d" stop-opacity="0" />
+            <stop offset="1" stop-color="#03120d" stop-opacity="0.65" />
+          </linearGradient>
+          <radialGradient id="moon-body-fill" cx="0.36" cy="0.3" r="0.78">
+            <stop offset="0" stop-color="#56635d" />
+            <stop offset="0.55" stop-color="#2c3833" />
+            <stop offset="1" stop-color="#141c19" />
+          </radialGradient>
+        </defs>
+        <g transform="translate(300 160)">
+          <g transform="rotate(-8)">
+            <path class="moon-orbit" d="M-236 0 A236 46 0 0 1 236 0" />
+            <g #moonBack>
+              <g #moon>
+                <circle r="25" fill="url(#moon-body-fill)" />
+                <path #moonGrid class="moon-line" />
+                <path #moonCraters class="moon-crater" />
+                <circle r="25" fill="url(#globe-night)" />
+                <circle class="moon-limb" r="25" />
+              </g>
+            </g>
+          </g>
+          <path class="orbit-back" transform="rotate(-14)" d="M-140 0 A140 36 0 0 1 140 0" />
+          <circle r="112" fill="url(#globe-atmosphere)" />
+          <circle r="92" fill="url(#globe-body-fill)" />
+          <g transform="rotate(-16)">
+            <path #graticule class="globe-line" />
+            <path #equator class="globe-line globe-equator" />
+            <path #land class="globe-land" />
+          </g>
+          <circle r="92" fill="url(#globe-night)" />
+          <circle class="globe-limb" r="92" />
+          <g #markers transform="rotate(-16)">
+            <g class="globe-marker">
+              <circle class="globe-ping-glow" r="10" />
+              <circle class="globe-ping-pulse" r="4.5" vector-effect="non-scaling-stroke" />
+              <circle class="globe-ping-pulse globe-ping-pulse-delayed" r="4.5" vector-effect="non-scaling-stroke" />
+              <circle class="globe-ping-core" r="3.5" />
+            </g>
+            <circle class="globe-marker globe-signal" r="2" />
+            <circle class="globe-marker globe-signal" r="2" />
+            <circle class="globe-marker globe-signal" r="2" />
+          </g>
+          <g transform="rotate(-14)">
+            <path class="orbit-front" d="M140 0 A140 36 0 0 1 -140 0" />
+            <g class="globe-satellite">
+              <rect x="-3" y="-3" width="6" height="6" rx="1" />
+              <rect class="satellite-panel" x="-12" y="-1.75" width="7.5" height="3.5" />
+              <rect class="satellite-panel" x="4.5" y="-1.75" width="7.5" height="3.5" />
+              <animateMotion dur="16s" repeatCount="indefinite" rotate="auto" path="M-140 0 A140 36 0 0 1 140 0 A140 36 0 0 1 -140 0" />
+              <!-- Fades out while the satellite passes behind the globe. -->
+              <animate attributeName="opacity" dur="16s" repeatCount="indefinite" keyTimes="0;0.08;0.11;0.39;0.42;0.5;1" values="0.7;0.7;0;0;0.7;1;0.7" />
+            </g>
+          </g>
+          <g transform="rotate(-8)">
+            <path class="moon-orbit moon-orbit-front" d="M236 0 A236 46 0 0 1 -236 0" />
+            <g #moonFront></g>
+          </g>
+        </g>
+      </svg>
+      <div class="coordinate coordinate-a">47°36'51.1"N<br />122°20'44.2"W</div>
+      <div class="coordinate coordinate-b">SEATTLE · WA</div>
+      <div class="signal-caption"><span class="signal-dot"></span> NETWORK READY <span>04:28:16 UTC</span></div>
+    </div>
+    <div class="brand-footer"><span>BUILT FOR THE FIELD</span><span>GEO TRACKER · 2026</span></div>
+  </section>
+  <section class="form-panel">
+    <div class="form-panel-top"><span>WELCOME BACK</span><span>SECURE ACCESS <ng-icon name="lucideShieldCheck" /></span></div>
+    <div class="login-card">
+      <div class="mobile-brand"><span class="brand-mark"><ng-icon name="lucideMapPin" /></span> GEO TRACKER</div>
+      <p class="eyebrow form-eyebrow">YOUR WORKSPACE AWAITS</p>
+      <h2>Sign in to<br />your account.</h2>
+      <p class="form-intro">Pick up where your team left off.</p>
+      <form (ngSubmit)="connect()" #loginForm="ngForm">
+        <div class="form-label-row"><label class="field-label" for="email">WORK EMAIL</label></div>
+        <mat-form-field appearance="outline" class="login-field">
+          <input matInput id="email" name="email" type="email" placeholder="you@company.com" [(ngModel)]="email" />
+        </mat-form-field>
+        <div class="form-label-row"><label class="field-label" for="password">PASSWORD</label></div>
+        <mat-form-field appearance="outline" class="login-field">
+          <input matInput id="password" name="password" type="password" placeholder="Enter your password" [(ngModel)]="password" />
+        </mat-form-field>
+        <div class="form-label-row">
+          <button class="text-action" type="button">Forgot password?</button>
+        </div>
+        <button mat-flat-button color="primary" class="connect-button" type="submit">
+          <span>Connect to workspace</span><ng-icon name="lucideArrowRight" />
+        </button>
+      </form>
+      <p class="login-note"><ng-icon name="lucideShieldCheck" /> Your connection is encrypted and secure.</p>
+    </div>
+    <div class="form-panel-footer"><span>© 2026 GEO TRACKER</span><a href="mailto:support@example.com">NEED HELP?</a></div>
+  </section>
+</main>

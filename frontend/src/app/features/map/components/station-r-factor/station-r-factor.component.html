@@ -1,0 +1,183 @@
+@if (loading()) {
+  <p class="station-message">Loading R factor data…</p>
+} @else {
+  <section class="r-tab__form">
+    <div class="station-period r-tab__field">
+      <span>From</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+        <mat-select [value]="fromYear()" (selectionChange)="fromYear.set($event.value)" panelClass="geo-select-panel" aria-label="First year">
+          @for (year of years(); track year) {
+            <mat-option [value]="year">{{ year }}{{ completeYears().has(year) ? '' : ' (partial)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="station-period r-tab__field">
+      <span>To</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+        <mat-select [value]="toYear()" (selectionChange)="toYear.set($event.value)" panelClass="geo-select-panel" aria-label="Last year">
+          @for (year of years(); track year) {
+            <mat-option [value]="year">{{ year }}{{ completeYears().has(year) ? '' : ' (partial)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="station-period r-tab__field r-tab__field--wide">
+      <span>Method preset</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+        <mat-select [value]="preset()" (selectionChange)="selectPreset($event.value)" panelClass="geo-select-panel" aria-label="Method preset">
+          @for (option of presets(); track option.name) {
+            <mat-option [value]="option.name">{{ option.name }} · I30 = I60 × {{ option.parameters.i30Factor }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <button type="button" class="r-tab__toggle" (click)="showAdvanced.set(!showAdvanced())" [attr.aria-expanded]="showAdvanced()">
+      {{ showAdvanced() ? 'Hide' : 'Show' }} parameters
+    </button>
+    <button matButton="filled" type="button" class="r-tab__calculate" (click)="calculate()" [disabled]="calculating() || periodInvalid()">
+      <ng-icon matButtonIcon name="lucideCalculator" />
+      {{ calculating() ? 'Calculating…' : 'Calculate R' }}
+    </button>
+  </section>
+
+  @if (showAdvanced() && parameters(); as values) {
+    <section class="r-tab__advanced">
+      <div class="station-period">
+        <span>I30 factor (× I60)</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <input #i30 matInput type="number" step="0.05" min="0.1" max="5" [value]="values.i30Factor" (change)="setParameter('i30Factor', i30.value)" />
+        </mat-form-field>
+      </div>
+      <div class="station-period">
+        <span>Erosive event ≥ (mm)</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <input #erosive matInput type="number" step="0.1" min="0.1" max="100" [value]="values.erosiveMinMm" (change)="setParameter('erosiveMinMm', erosive.value)" />
+        </mat-form-field>
+      </div>
+      <div class="station-period">
+        <span>Dry gap (hours)</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <input #gap matInput type="number" step="1" min="1" max="48" [value]="values.separationHours" (change)="setParameter('separationHours', gap.value)" />
+        </mat-form-field>
+      </div>
+      <div class="station-period">
+        <span>Gap rain below (mm)</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field">
+          <input #gapMm matInput type="number" step="0.01" min="0.01" max="20" [value]="values.separationMaxMm" (change)="setParameter('separationMaxMm', gapMm.value)" />
+        </mat-form-field>
+      </div>
+      <p class="r-tab__note">Energy: Wischmeier &amp; Smith ({{ values.energyEquation }}) · years split in {{ values.yearBoundary }}.</p>
+    </section>
+  }
+
+  @if (periodHasGaps()) {
+    <p class="r-tab__warning">Some years in this period have less than 80% of hours with rain data; missing hours count as dry.</p>
+  }
+  @if (calculating()) { <mat-progress-bar class="r-progress" mode="indeterminate" /> }
+  @if (error()) { <p class="station-message station-message--error">{{ error() }}</p> }
+
+  @if (result(); as run) {
+    <section class="r-tab__result">
+      <div class="r-tab__headline">
+        <span class="r-tab__value">{{ run.rFactor | number: '1.0-1' }}</span>
+        <span class="r-tab__unit">MJ mm ha⁻¹ h⁻¹ yr⁻¹</span>
+        <span class="r-tab__meta">
+          Run #{{ run.id }} · {{ run.periodStart | date: 'yyyy' }}–{{ run.periodEnd | date: 'yyyy' }} · {{ run.yearsUsed }} years ·
+          I30 = I60 × {{ run.parameters.i30Factor }} · erosive ≥ {{ run.parameters.erosiveMinMm }} mm
+        </span>
+        @if (run.outdated) {
+          <span class="r-tab__badge" matTooltip="Data imported after this run changed hours in its period">Outdated</span>
+          <button type="button" class="r-tab__toggle" (click)="rerun(run.id)" [disabled]="calculating()">
+            <ng-icon name="lucideRefreshCw" /> Re-run
+          </button>
+        }
+        <span class="r-tab__exports">
+          <a [href]="api.exportUrl(run.id, 'annual.csv')" download><ng-icon name="lucideDownload" /> Annual CSV</a>
+          <a [href]="api.exportUrl(run.id, 'events.csv')" download><ng-icon name="lucideDownload" /> Events CSV</a>
+          <a [href]="api.exportUrl(run.id, 'station.geojson')" download><ng-icon name="lucideDownload" /> GeoJSON</a>
+        </span>
+      </div>
+
+      <div class="r-tab__chart" role="img" [attr.aria-label]="'Annual erosivity from ' + run.years[0]?.year + ' to ' + run.years.at(-1)?.year">
+        <span class="r-tab__mean" [style.bottom.%]="barHeight(run.rFactor ?? 0)"><b>R</b></span>
+        @for (year of run.years; track year.year) {
+          <span class="r-tab__bar" [class.is-excluded]="!year.included" [matTooltip]="year.year + ': ' + (year.erosivity | number: '1.0-0') + ' · ' + year.erosiveEvents + ' erosive events'">
+            <i [style.height.%]="barHeight(year.erosivity)"></i>
+            <small>{{ year.year % 100 | number: '2.0-0' }}</small>
+          </span>
+        }
+      </div>
+
+      <div class="station-table-wrap r-tab__table">
+        <table mat-table class="geo-table" [dataSource]="run.years">
+          <ng-container matColumnDef="year">
+            <th mat-header-cell *matHeaderCellDef>Year</th>
+            <td mat-cell *matCellDef="let year">{{ year.year }}</td>
+          </ng-container>
+          <ng-container matColumnDef="erosivity">
+            <th mat-header-cell *matHeaderCellDef>EI30 sum</th>
+            <td mat-cell *matCellDef="let year">{{ year.erosivity | number: '1.1-1' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="erosiveEvents">
+            <th mat-header-cell *matHeaderCellDef>Erosive events</th>
+            <td mat-cell *matCellDef="let year">{{ year.erosiveEvents }}</td>
+          </ng-container>
+          <ng-container matColumnDef="precipitationMm">
+            <th mat-header-cell *matHeaderCellDef>Rain mm</th>
+            <td mat-cell *matCellDef="let year">{{ year.precipitationMm | number: '1.1-1' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="missingHours">
+            <th mat-header-cell *matHeaderCellDef>Missing hours</th>
+            <td mat-cell *matCellDef="let year">{{ year.missingHours | number }}</td>
+          </ng-container>
+          <ng-container matColumnDef="included">
+            <th mat-header-cell *matHeaderCellDef>In R</th>
+            <td mat-cell *matCellDef="let year">{{ year.included ? 'Yes' : 'No' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="yearColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: yearColumns"></tr>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (history().length) {
+    <section class="r-tab__history">
+      <span class="r-tab__history-title"><ng-icon name="lucideHistory" /> Previous runs</span>
+      <div class="station-table-wrap">
+        <table mat-table class="geo-table" [dataSource]="history()">
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Run</th>
+            <td mat-cell *matCellDef="let run">#{{ run.id }} · {{ run.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="period">
+            <th mat-header-cell *matHeaderCellDef>Period</th>
+            <td mat-cell *matCellDef="let run">{{ run.periodStart | date: 'dd/MM/yyyy' }} – {{ run.periodEnd | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="parameters">
+            <th mat-header-cell *matHeaderCellDef>Parameters</th>
+            <td mat-cell *matCellDef="let run">I30 × {{ run.parameters.i30Factor }} · ≥ {{ run.parameters.erosiveMinMm }} mm</td>
+          </ng-container>
+          <ng-container matColumnDef="rFactor">
+            <th mat-header-cell *matHeaderCellDef>R</th>
+            <td mat-cell *matCellDef="let run">{{ run.rFactor | number: '1.0-1' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="yearsUsed">
+            <th mat-header-cell *matHeaderCellDef>Years</th>
+            <td mat-cell *matCellDef="let run">{{ run.yearsUsed }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let run">
+              @if (run.outdated) { <span class="r-tab__badge">Outdated</span> }
+              <button type="button" class="r-tab__toggle" (click)="open(run.id)" [class.is-active]="result()?.id === run.id">Open</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="historyColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>
+        </table>
+      </div>
+    </section>
+  }
+}

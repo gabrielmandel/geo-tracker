@@ -1,0 +1,8 @@
+<mat-form-field appearance="outline" subscriptSizing="dynamic" class="geo-field range-field">
+  <mat-date-range-input #rangeInput [rangePicker]="picker" [max]="max()" [attr.aria-label]="ariaLabel()">
+    <input matStartDate placeholder="dd/mm/yyyy" [value]="range().start" (dateChange)="emitRange(rangeInput)" />
+    <input matEndDate placeholder="dd/mm/yyyy" [value]="range().end" (dateChange)="emitRange(rangeInput)" />
+  </mat-date-range-input>
+  <mat-datepicker-toggle matIconSuffix [for]="picker" />
+  <mat-date-range-picker #picker panelClass="geo-range-picker" />
+</mat-form-field>

@@ -1,0 +1,222 @@
+// R factor map: floating layer panel (QGIS "Layer styling" dock) and legend over the Leaflet map.
+.r-panel {
+  position: absolute;
+  z-index: 430;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--home-line);
+  border-radius: 4px;
+  background: var(--home-overlay);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 30%);
+  color: var(--home-text-soft);
+  animation: panel-in 180ms ease-out both;
+  backdrop-filter: blur(4px);
+}
+.r-panel__header {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--home-line);
+}
+.r-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--lime);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+.r-panel__close {
+  display: grid;
+  width: 26px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--home-muted);
+  cursor: pointer;
+}
+.r-panel__actions { display: flex; gap: 2px; }
+.r-panel__close:hover,
+.r-panel__link:hover {
+  background: var(--home-hover);
+}
+.r-panel__body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.r-panel__body[hidden] { display: none; }
+.r-panel__cache {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  color: var(--home-muted);
+  font-size: 9px;
+}
+.r-panel__cache b { color: #f2a58f; font-weight: 600; }
+.r-panel__cache .r-progress { grid-column: 1 / -1; }
+.r-panel__link {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--lime);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  cursor: pointer;
+}
+.r-panel__group {
+  display: grid;
+  gap: 6px;
+}
+.r-panel__label {
+  color: var(--home-muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+}
+// minmax(0, 1fr): fields may shrink below their text width instead of widening the panel.
+.r-panel__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+}
+.r-panel__row:has(.r-panel__to) { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.r-panel__row--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.r-panel__row .mat-mdc-form-field { min-width: 0; }
+.r-panel__to { color: var(--home-muted); font-size: 9px; }
+.r-panel__generate {
+  --mat-button-filled-container-height: 34px;
+  --mat-button-filled-container-color: var(--lime);
+  --mat-button-filled-label-text-color: var(--forest-dark);
+  --mat-button-filled-label-text-size: 11px;
+  --mat-button-filled-label-text-weight: 700;
+  --mat-button-filled-container-shape: 4px;
+  --mat-button-filled-disabled-container-color: rgb(232 245 228 / 10%);
+  --mat-button-filled-disabled-label-text-color: rgb(232 245 228 / 38%);
+}
+.r-progress {
+  --mat-progress-bar-active-indicator-color: var(--lime);
+  --mat-progress-bar-track-color: rgb(232 245 228 / 10%);
+}
+.r-panel__error {
+  margin: 0;
+  color: #f09a82;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.r-panel__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px 0;
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+}
+.r-panel__stats div { display: grid; gap: 3px; }
+.r-panel__stats span { color: var(--home-muted); font-family: 'DM Mono', monospace; font-size: 7px; }
+.r-panel__stats strong { color: var(--home-text); font-family: 'Manrope', sans-serif; font-size: 12px; }
+.r-ramp-swatch {
+  display: inline-block;
+  width: 64px;
+  height: 9px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+.r-panel__slider {
+  display: grid;
+  gap: 0;
+  color: var(--home-muted);
+  font-size: 9px;
+}
+.r-slider {
+  --mat-slider-active-track-color: var(--lime);
+  --mat-slider-inactive-track-color: rgb(232 245 228 / 20%);
+  --mat-slider-handle-color: var(--lime);
+  --mat-slider-focus-handle-color: var(--lime);
+  --mat-slider-hover-handle-color: var(--lime);
+  --mat-slider-ripple-color: var(--lime);
+  --mat-slider-hover-state-layer-color: rgb(216 243 106 / 12%);
+  --mat-slider-focus-state-layer-color: rgb(216 243 106 / 18%);
+  margin: 0 8px;
+}
+.r-panel__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 9px;
+}
+.r-panel__toggles label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.r-panel__toggles input { accent-color: var(--lime); }
+.r-panel__exports {
+  display: flex;
+  gap: 6px;
+}
+.r-panel__exports a {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid rgb(232 245 228 / 22%);
+  border-radius: 3px;
+  color: var(--home-text);
+  font-size: 9px;
+  text-align: center;
+  text-decoration: none;
+}
+.r-panel__exports a:hover { border-color: var(--lime); color: var(--lime); }
+
+.r-legend {
+  position: absolute;
+  z-index: 420;
+  right: 64px;
+  bottom: 14px;
+  display: grid;
+  gap: 5px;
+  min-width: 150px;
+  padding: 10px 12px;
+  border: 1px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-overlay);
+  color: var(--home-text-soft);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 25%);
+}
+.r-legend__heading { color: var(--lime); font-family: 'DM Mono', monospace; font-size: 8px; }
+.r-legend__unit { margin-bottom: 3px; color: var(--home-muted); font-size: 8px; }
+.r-legend__class {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.r-legend__class i {
+  width: 14px;
+  height: 9px;
+  border-radius: 2px;
+}
+.r-legend__readout {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--home-line);
+  color: var(--home-muted);
+  font-size: 9px;
+}
+.r-legend__readout b { color: var(--home-text); }
+.raster-tile { image-rendering: pixelated; }
