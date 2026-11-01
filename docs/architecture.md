@@ -869,13 +869,31 @@ flowchart LR
 
 Steps:
 
-1. Push to `main` of [gabrielmandel/geo-tracker](https://github.com/gabrielmandel/geo-tracker): CI runs and `publish.yml` creates the two packages. Once, make each package **public** (your profile → Packages → package → Package settings → Danger Zone → Change visibility): new packages start private even in a public repository, so the server could not pull them anonymously. Public cannot be undone.
-2. Create the VM: `VM.Standard.A1.Flex`, 2 OCPU / 12 GB, Ubuntu 24.04, boot volume ~100 GB (the full INMET history is about 14 GB in PostgreSQL, 89 million hourly rows, plus WAL, dumps and images). Allow TCP 80/443 and UDP 443 in the subnet security list and in the VM firewall (Oracle's Ubuntu images only accept SSH by default).
-3. Point the host name to the VM's public IP.
-4. On the VM: install Docker Engine with the Compose plugin; copy `deploy/`; `cp .env.example .env` and fill `DOMAIN`, `ACME_EMAIL`, `GHCR_OWNER`, `DB_PASSWORD`, `ADMIN_TOKEN` (`openssl rand -hex 32`).
-5. `docker compose -f docker-compose.prod.yml up -d` — Caddy obtains the certificate on first start.
-6. `sh seed-inmet.sh` — queues 2000 → current year from INMET; imports run one at a time (hours for the whole history) and the R cache follows each year. Progress: `docker compose -f docker-compose.prod.yml logs -f backend`.
-7. Updates: push a `vX.Y.Z` tag, then `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d`.
+1. Images: every push to `main` publishes `edge`; a `vX.Y.Z` tag also publishes `X.Y.Z`, `X.Y` and `latest`. Both packages are public (new packages start private: Package settings → Change visibility, once).
+2. Oracle console, home region: Compute → Instances → Create instance with image Canonical Ubuntu 24.04, shape `VM.Standard.A1.Flex` at 2 OCPU / 12 GB (Always Free-eligible), a new VCN with a public subnet and a public IPv4 address, your SSH public key, and a 100 GB boot volume (the full INMET history is about 14 GB in PostgreSQL, 89 million hourly rows, plus WAL, dumps and images). "Out of host capacity" means no free Ampere capacity at the moment: retry later or in another availability domain.
+3. The VCN's Default Security List: add ingress rules from `0.0.0.0/0` for TCP 80, TCP 443 and UDP 443 (HTTP/3).
+4. Host name: a DuckDNS subdomain pointing to the VM's public IP, e.g. `geotracker.duckdns.org`.
+5. On the VM (`ssh ubuntu@<public-ip>`), open the VM firewall (Oracle's Ubuntu images accept only SSH) and install Docker, then log out and in again:
+   ```bash
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+   sudo iptables -I INPUT 6 -m state --state NEW -p udp --dport 443 -j ACCEPT
+   sudo netfilter-persistent save
+   curl -fsSL https://get.docker.com | sudo sh
+   sudo usermod -aG docker ubuntu
+   ```
+6. Configure and start (the host name must already point to the VM, so Caddy gets the certificate):
+   ```bash
+   git clone https://github.com/gabrielmandel/geo-tracker.git && cd geo-tracker/deploy
+   cp .env.example .env && chmod 600 .env
+   sed -i -e "s|^DOMAIN=.*|DOMAIN=geotracker.duckdns.org|" \
+          -e "s|^ACME_EMAIL=.*|ACME_EMAIL=you@example.org|" \
+          -e "s|^DB_PASSWORD=.*|DB_PASSWORD=$(openssl rand -hex 24)|" \
+          -e "s|^ADMIN_TOKEN=.*|ADMIN_TOKEN=$(openssl rand -hex 32)|" .env
+   docker compose -f docker-compose.prod.yml up -d
+   ```
+7. Load the INMET history: `nohup sh seed-inmet.sh > seed.log 2>&1 &` (keeps running after you log out). Years import one at a time and the R cache follows each year; progress in `seed.log` and `docker compose -f docker-compose.prod.yml logs -f backend`. If the server cannot reach INMET, upload the yearly ZIPs from a PC instead: `curl -H "X-Admin-Token: <token>" -F "file=@2024.zip" https://<host>/api/imports/archives`.
+8. Updates: `git pull`, then `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d`.
 
 Notes: Oracle may reclaim Always Free instances that stay idle (CPU, network and memory all under 20%) for 7 days. The admin token is a stop-gap until JWT (§15): the seed script reads it inside the container, so it never appears on the command line; rotate it by editing `.env` and running `up -d`. The prod stack was smoke-tested locally from an empty database: migrations, admin-token checks, INMET seeding of 2000–2001 and an R map through Caddy.
 
