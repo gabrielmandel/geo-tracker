@@ -15,7 +15,7 @@ Last updated: 2026-10-31
 | Backend | Kotlin + Spring Boot API in `backend/` (see §12) |
 | Local stack | Compose (Podman or Docker): PostgreSQL, API, nginx + Angular, pgAdmin (see §12) |
 | R factor | Per-station runs (R tab of the station modal) and a national R map: annual cache → IDW grid masked to Brazil, painted in the browser, exported for QGIS (see §9, §12) |
-| Hosting | Free: GitHub Actions publishes amd64/arm64 images to GHCR; one VM runs `deploy/` (Caddy HTTPS + Compose); see §14 |
+| Hosting | Free: GitHub Actions publishes amd64/arm64 images to GHCR; one VM runs `deploy/` (Caddy HTTPS + Compose), or this PC serves the local stack through a Tailscale Funnel tunnel; see §14 |
 
 **Bootstrap / Tailwind:** not used. Angular Material already provides components, typography and theming; Bootstrap would compete with it, and Tailwind's base reset interferes with Material styles. Layout is done with plain CSS grid/flex in the component stylesheets.
 
@@ -896,6 +896,15 @@ Steps:
 8. Updates: `git pull`, then `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d`.
 
 Notes: Oracle may reclaim Always Free instances that stay idle (CPU, network and memory all under 20%) for 7 days. The admin token is a stop-gap until JWT (§15): the seed script reads it inside the container, so it never appears on the command line; rotate it by editing `.env` and running `up -d`. The prod stack was smoke-tested locally from an empty database: migrations, admin-token checks, INMET seeding of 2000–2001 and an R map through Caddy.
+
+### Home server through a tunnel (no router changes)
+
+When no cloud VM is available (Oracle answers "Out of host capacity" for Ampere shapes), this PC serves the local stack. A tunnel client on the PC keeps an outbound connection to a relay; visitors reach the relay, which forwards their requests through that connection, so no router port is opened and the home IP stays hidden.
+
+1. Public mode: `.env` next to `docker-compose.yml` (git-ignored) with `SPRING_PROFILES_ACTIVE=prod`, `ADMIN_TOKEN=<64 hex characters>` and `INMET_SYNC_ENABLED=true`, then `docker-compose up -d`. The data volume is unchanged; admin actions now need the token and INMET is synced weekly.
+2. Tunnel with Tailscale Funnel (free, HTTPS included, no domain): install Tailscale, sign in, run `tailscale funnel --bg 4200` and approve enabling Funnel in the browser. The site is `https://<machine>.<tailnet>.ts.net`; rename the machine (e.g. `geo-tracker`) in the Tailscale admin console. Only port 4200 (nginx with its rate limits) is published: PostgreSQL, pgAdmin and the backend port stay on `127.0.0.1`. `tailscale funnel status` shows it, `tailscale funnel reset` removes it.
+3. Keep it serving: the power plan must never sleep on AC power. The per-user scheduled task "GEO TRACKER server" starts the Podman machine and the stack one minute after logon (remove with `Unregister-ScheduledTask -TaskName 'GEO TRACKER server'`); Tailscale runs as a Windows service and keeps the Funnel setting across restarts.
+4. With an own domain, Cloudflare Tunnel (`cloudflared`) works the same way and adds a custom host name and Cloudflare caching in front.
 
 ## 15. Next steps
 

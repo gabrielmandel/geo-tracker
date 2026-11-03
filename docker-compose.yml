@@ -1,9 +1,11 @@
-# Local development stack. Credentials below are development defaults; override them with a .env file.
+# Local stack. Credentials below are development defaults; override them with a .env file.
+# Public home server behind a tunnel: SPRING_PROFILES_ACTIVE=prod, ADMIN_TOKEN and INMET_SYNC_ENABLED=true in .env (docs §14).
 name: geo-tracker
 
 services:
   db:
     image: postgres:18-alpine
+    restart: unless-stopped
     # Bulk-load friendly settings for the local stack. synchronous_commit=off never corrupts data; a crash can only
     # lose the last commits, and each INMET file commits its rows together with its COMPLETED import record.
     command: ["postgres", "-c", "synchronous_commit=off", "-c", "max_wal_size=4GB"]
@@ -24,11 +26,14 @@ services:
 
   backend:
     build: ./backend
+    restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-gpstracker}
       DB_USER: ${DB_USER:-gpstracker}
       DB_PASSWORD: ${DB_PASSWORD:-gpstracker}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      INMET_SYNC_ENABLED: ${INMET_SYNC_ENABLED:-false}
     ports:
       - "127.0.0.1:8080:8080"
     healthcheck:
@@ -43,6 +48,7 @@ services:
 
   frontend:
     build: ./frontend
+    restart: unless-stopped
     ports:
       - "127.0.0.1:4200:8080"
     depends_on:
